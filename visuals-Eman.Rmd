@@ -1,0 +1,91 @@
+---
+title: "Visualizations-Eman"
+author: "Eman Nagib"
+date: "2/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(readxl)
+library(tibble)
+library(stringr)
+```
+
+```{r} 
+## Airfare Table
+airfare_df <- read_excel("Final Flights Data/Airfare(2015-2019).xlsx")
+
+dim(airfare_df)
+glimpse(airfare_df)
+
+names(airfare_df) <- str_replace_all(tolower(names(airfare_df)), "`","")
+names(airfare_df) <- str_replace_all(tolower(names(airfare_df)), " ","_")
+```
+
+```{r}
+## On-time Performance Table
+time_performance <- read_csv("Final Flights Data/Airline on-time perform(2015-2019).csv")
+
+dim(time_performance)
+glimpse(time_performance)
+
+names(time_performance) <- str_replace_all(tolower(names(time_performance)), "`","")
+names(time_performance) <- str_replace_all(tolower(names(time_performance)), " ","_")
+```
+
+```{r}
+## Delay Reasons Table
+delay_reasons <- read_csv("Final Flights Data/Delay Reasons by airline(2015-2019).csv", skip = 1)
+
+delay_reasons$X11 <- NULL
+dim(delay_reasons)
+glimpse(delay_reasons)
+
+names(delay_reasons) <- str_replace_all(tolower(names(delay_reasons)), "`","")
+names(delay_reasons) <- str_replace_all(tolower(names(delay_reasons)), " ","_")
+```
+```{r}
+## Load Factor Table
+loadfct_df <- read_csv("Final Flights Data/Load Factor by Airline(2015-2019).csv")
+
+dim(loadfct_df)
+glimpse(loadfct_df)
+
+names(loadfct_df) <- str_replace_all(tolower(names(loadfct_df)), "`","")
+names(loadfct_df) <- str_replace_all(tolower(names(loadfct_df)), " ","_")
+```
+```{r}
+## No. Flights Table
+no_flights <- read_csv("Final Flights Data/Number of Flights(2015-2019).csv")
+
+dim(no_flights)
+glimpse(no_flights)
+
+names(no_flights) <- str_replace_all(tolower(names(no_flights)), "`","")
+names(no_flights) <- str_replace_all(tolower(names(no_flights)), " ","_")
+```
+
+```{r}
+## No. Passengers Table
+no_passengers <- read_csv("Final Flights Data/Number of Passengers by Airline(2015-2019).csv")
+
+dim(no_passengers)
+glimpse(no_passengers)
+
+names(no_passengers) <- str_replace_all(tolower(names(no_passengers)), "`","")
+names(no_passengers) <- str_replace_all(tolower(names(no_passengers)), " ","_")
+```
+
+```{r}
+## Cancellation Fees
+cancel_fees <- read_csv("Final Flights Data/Res Cxl Fees(2015-2019).csv")
+
+dim(cancel_fees)
+glimpse(cancel_fees)
+
+names(cancel_fees) <- str_replace_all(tolower(names(cancel_fees)), "`","")
+names(cancel_fees) <- str_replace_all(tolower(names(cancel_fees)), " ","_")
+```
+
