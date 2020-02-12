@@ -1,0 +1,163 @@
+---
+title: "visuals-Kwangwoo"
+author: "Kwangwoo Kim"
+date: "2/12/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(readxl)
+library(tibble)
+library(stringr)
+library(ggplot2)
+library(dplyr)
+
+```
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+air <- as.data.frame(air) %>% na.omit()
+air$`Average Departure Delay (minutes)` <- as.numeric(air$`Average Departure Delay (minutes)`)
+
+air_viz19 = air %>% select(Year, Carriers ,`Average Departure Delay (minutes)`) %>% 
+  filter(Year == 2019)
+air_viz19$`Average Departure Delay (minutes)` <- sort(air_viz19$`Average Departure Delay (minutes)`,T)
+air_viz19 <- air_viz19 %>% top_n(2) 
+
+air_viz18 = air %>% select(Year, Carriers ,`Average Departure Delay (minutes)`) %>% 
+  filter(Year == 2018)
+air_viz18$`Average Departure Delay (minutes)` <- sort(air_viz18$`Average Departure Delay (minutes)`,T)
+air_viz18 <- air_viz18 %>% top_n(2) 
+
+air_viz17 = air %>% select(Year, Carriers ,`Average Departure Delay (minutes)`) %>% 
+  filter(Year == 2017)
+air_viz17$`Average Departure Delay (minutes)` <- sort(air_viz17$`Average Departure Delay (minutes)`,T)
+air_viz17 <- air_viz17 %>% top_n(2) 
+
+air_viz16 = air %>% select(Year, Carriers ,`Average Departure Delay (minutes)`) %>% 
+  filter(Year == 2016)
+air_viz16$`Average Departure Delay (minutes)` <- sort(air_viz16$`Average Departure Delay (minutes)`,T)
+air_viz16 <- air_viz16 %>% top_n(2) 
+
+air_viz15 = air %>% select(Year, Carriers ,`Average Departure Delay (minutes)`) %>% 
+  filter(Year == 2015)
+air_viz15$`Average Departure Delay (minutes)` <- sort(air_viz15$`Average Departure Delay (minutes)`,T)
+air_viz15 <- air_viz15 %>% top_n(2) 
+
+depart_delay <- rbind(air_viz15,air_viz16,air_viz17,air_viz18,air_viz19)
+ggplot(depart_delay, aes(Year, `Average Departure Delay (minutes)`, fill = Carriers)) + geom_col(position = 'dodge') + ggtitle("Top 2 Carriers ADD over 5 years")
+
+
+
+  
+
+```
+```{r}
+air$`Percent Flights Cancelled` <- as.numeric(air$`Percent Flights Cancelled`)
+
+cancel_19 = air %>% select(Year, Carriers ,`Percent Flights Cancelled`)%>% 
+  filter(Year == 2019)
+cancel_19$`Percent Flights Cancelled` <- sort(cancel_19$`Percent Flights Cancelled`,T)
+cancel_19 <- cancel_19 %>% top_n(2) 
+
+cancel_18 = air %>% select(Year, Carriers ,`Percent Flights Cancelled`)%>% 
+  filter(Year == 2018)
+cancel_18$`Percent Flights Cancelled` <- sort(cancel_18$`Percent Flights Cancelled`,T)
+cancel_18 <- cancel_18 %>% top_n(2) 
+
+cancel_17 = air %>% select(Year, Carriers ,`Percent Flights Cancelled`)%>% 
+  filter(Year == 2017)
+cancel_17$`Percent Flights Cancelled` <- sort(cancel_17$`Percent Flights Cancelled`,T)
+cancel_17 <- cancel_17 %>% top_n(2) 
+
+cancel_16 = air %>% select(Year, Carriers ,`Percent Flights Cancelled`)%>% 
+  filter(Year == 2016)
+cancel_16$`Percent Flights Cancelled` <- sort(cancel_16$`Percent Flights Cancelled`,T)
+cancel_16 <- cancel_16 %>% top_n(2) 
+
+cancel_15 = air %>% select(Year, Carriers ,`Percent Flights Cancelled`)%>% 
+  filter(Year == 2015)
+cancel_15$`Percent Flights Cancelled` <- sort(cancel_15$`Percent Flights Cancelled`,T)
+cancel_15 <- cancel_15 %>% top_n(2) 
+
+
+cancel_p <- rbind(cancel_15, cancel_16, cancel_17, cancel_18, cancel_19)
+ggplot(cancel_p, aes(Year, `Percent Flights Cancelled`, fill = Carriers)) + 
+  geom_col(position = 'dodge') + ggtitle("Top 2 Carriers PFC over 5 years")
+
+```
+```{r}
+air$`Average Arrival Delay (minutes)` <- as.numeric(air$`Average Arrival Delay (minutes)`)
+
+delayA_19 = air %>% select(Year, Carriers ,`Average Arrival Delay (minutes)`)%>% 
+  filter(Year == 2019)
+delayA_19$`Average Arrival Delay (minutes)` <- sort(delayA_19$`Average Arrival Delay (minutes)` ,T)
+delayA_19 <- delayA_19 %>% top_n(2) 
+
+delayA_18 = air %>% select(Year, Carriers ,`Average Arrival Delay (minutes)`)%>% 
+  filter(Year == 2018)
+delayA_18$`Average Arrival Delay (minutes)` <- sort(delayA_18$`Average Arrival Delay (minutes)` ,T)
+delayA_18 <- delayA_18 %>% top_n(2) 
+
+delayA_17 = air %>% select(Year, Carriers ,`Average Arrival Delay (minutes)`)%>% 
+  filter(Year == 2017)
+delayA_17$`Average Arrival Delay (minutes)` <- sort(delayA_17$`Average Arrival Delay (minutes)` ,T)
+delayA_17 <- delayA_17 %>% top_n(2) 
+
+delayA_16 = air %>% select(Year, Carriers ,`Average Arrival Delay (minutes)`)%>% 
+  filter(Year == 2016)
+delayA_16$`Average Arrival Delay (minutes)` <- sort(delayA_16$`Average Arrival Delay (minutes)` ,T)
+delayA_16 <- delayA_16 %>% top_n(2) 
+
+delayA_15 = air %>% select(Year, Carriers ,`Average Arrival Delay (minutes)`)%>% 
+  filter(Year == 2015)
+delayA_15$`Average Arrival Delay (minutes)` <- sort(delayA_15$`Average Arrival Delay (minutes)` ,T)
+delayA_15 <- delayA_15 %>% top_n(2) 
+
+delayA <- rbind(delayA_15,delayA_16,delayA_17,delayA_18,delayA_19)
+ggplot(delayA, aes(Year, `Average Arrival Delay (minutes)`, fill = Carriers)) + 
+  geom_col(position = 'dodge') + ggtitle("Top 2 Carriers AAD over 5 years")
+
+
+```
+
+```{r}
+air$`Percent Flights Diverted` <- as.numeric(air$`Percent Flights Diverted` )
+
+PFD_19 = air %>% select(Year, Carriers, `Percent Flights Diverted`)%>% 
+  filter(Year == 2019)
+PFD_19$`Percent Flights Diverted` <- sort(PFD_19$`Percent Flights Diverted` ,T)
+PFD_19 <- PFD_19 %>% top_n(2) 
+
+PFD_18 = air %>% select(Year, Carriers, `Percent Flights Diverted`)%>% 
+  filter(Year == 2018)
+PFD_18$`Percent Flights Diverted` <- sort(PFD_18$`Percent Flights Diverted` ,T)
+PFD_18 <- PFD_18 %>% top_n(2) 
+
+PFD_17 = air %>% select(Year, Carriers, `Percent Flights Diverted`)%>% 
+  filter(Year == 2017)
+PFD_17$`Percent Flights Diverted` <- sort(PFD_17$`Percent Flights Diverted` ,T)
+PFD_17 <- PFD_17 %>% top_n(2) 
+
+PFD_16 = air %>% select(Year, Carriers, `Percent Flights Diverted`)%>% 
+  filter(Year == 2016)
+PFD_16$`Percent Flights Diverted` <- sort(PFD_16$`Percent Flights Diverted` ,T)
+PFD_16 <- PFD_16 %>% top_n(2) 
+
+PFD_15 = air %>% select(Year, Carriers, `Percent Flights Diverted`)%>% 
+  filter(Year == 2015)
+PFD_15$`Percent Flights Diverted` <- sort(PFD_15$`Percent Flights Diverted` ,T)
+PFD_15 <- PFD_15 %>% top_n(2) 
+
+
+PFD <- rbind(PFD_15, PFD_16, PFD_17, PFD_18, PFD_19)
+ggplot(PFD, aes(Year,`Percent Flights Diverted`, fill = Carriers)) + 
+  geom_col(position = 'dodge') + ggtitle("Top 2 Carriers PFD over 5 years")
+
+```
+
