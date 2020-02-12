@@ -11,6 +11,8 @@ library(readr)
 library(readxl)
 library(tibble)
 library(stringr)
+library(ggplot2)
+library(dplyr)
 ```
 
 ```{r} 
@@ -27,12 +29,69 @@ names(airfare_df) <- str_replace_all(tolower(names(airfare_df)), " ","_")
 ```{r}
 ## On-time Performance Table
 time_performance <- read_csv("Final Flights Data/Airline on-time perform(2015-2019).csv")
+#View(time_performance)
 
-dim(time_performance)
+names(time_performance)
 glimpse(time_performance)
 
 names(time_performance) <- str_replace_all(tolower(names(time_performance)), "`","")
 names(time_performance) <- str_replace_all(tolower(names(time_performance)), " ","_")
+
+
+time_performance$total_number <- 
+  as.integer(gsub(",","",time_performance$total_number))
+
+time_performance$`average_departure_delay_(minutes)` <- 
+  as.double(gsub(",","",time_performance$`average_departure_delay_(minutes)`))
+
+time_performance$`average_taxi-out_time_(minutes)` <- 
+  as.double(gsub(",","", time_performance$`average_taxi-out_time_(minutes)`))
+
+time_performance$`average_scheduled_departure_to_take-off_(minutes)`<- as.double(gsub(",","",time_performance$`average_scheduled_departure_to_take-off_(minutes)`))
+
+time_performance$`average_arrival_delay_(minutes)`<- 
+  as.double(gsub(",","",time_performance$`average_arrival_delay_(minutes)`))
+
+time_performance$`average_airborne_time_(minutes)`<- 
+  as.double(gsub(",","",time_performance$`average_airborne_time_(minutes)`))
+
+time_performance$`average_taxi-in_time_(minutes)`<- 
+  as.double(gsub(",","",time_performance$`average_taxi-in_time_(minutes)`))
+
+time_performance$total_number_cancelled<- 
+  as.double(gsub(",","",time_performance$total_number_cancelled))
+
+time_performance$percent_flights_cancelled<- 
+  as.double(gsub(",","",time_performance$percent_flights_cancelled))
+
+time_performance$total_number_diverted<- 
+  as.double(gsub(",","",time_performance$total_number_diverted))
+
+time_performance$percent_flights_diverted<- 
+  as.double(gsub(",","",time_performance$percent_flights_diverted))
+
+time_performance$diverted_flights_reaching_scheduled_destination<- as.double(gsub(",","",time_performance$diverted_flights_reaching_scheduled_destination))
+
+time_performance$`diverted_flights_(mins)`<- 
+  as.double(gsub(",","",time_performance$`diverted_flights_(mins)`))
+
+time_performance$`cancelled_flights_(mins)` <- 
+  as.double(gsub(",","",time_performance$`cancelled_flights_(mins)`))
+
+time_performance$`carrier_(avg._mins)`<- 
+  as.double(gsub(",","",time_performance$`carrier_(avg._mins)`))
+
+time_performance$`weather(avg._mins)`<- 
+  as.double(gsub(",","",time_performance$`weather(avg._mins)`))
+
+time_performance$`national_aviation_system(avg._mins)`<- 
+  as.double(gsub(",","",time_performance$`national_aviation_system(avg._mins)`))
+
+time_performance$`security(avg._mins)` <- 
+  as.double(gsub(",","",time_performance$`security(avg._mins)` ))
+
+time_performance$`late_aircraft_arrival(avg._mins)` <- 
+  as.double(gsub(",","",time_performance$`late_aircraft_arrival(avg._mins)`))
 ```
 
 ```{r}
@@ -46,46 +105,235 @@ glimpse(delay_reasons)
 names(delay_reasons) <- str_replace_all(tolower(names(delay_reasons)), "`","")
 names(delay_reasons) <- str_replace_all(tolower(names(delay_reasons)), " ","_")
 ```
+
 ```{r}
 ## Load Factor Table
 loadfct_df <- read_csv("Final Flights Data/Load Factor by Airline(2015-2019).csv")
 
-dim(loadfct_df)
-glimpse(loadfct_df)
-
 names(loadfct_df) <- str_replace_all(tolower(names(loadfct_df)), "`","")
 names(loadfct_df) <- str_replace_all(tolower(names(loadfct_df)), " ","_")
+
+dim(loadfct_df)
+glimpse(loadfct_df)
 ```
 ```{r}
 ## No. Flights Table
 no_flights <- read_csv("Final Flights Data/Number of Flights(2015-2019).csv")
 
-dim(no_flights)
-glimpse(no_flights)
-
 names(no_flights) <- str_replace_all(tolower(names(no_flights)), "`","")
 names(no_flights) <- str_replace_all(tolower(names(no_flights)), " ","_")
+
+dim(no_flights)
+glimpse(no_flights)
 ```
 
 ```{r}
 ## No. Passengers Table
 no_passengers <- read_csv("Final Flights Data/Number of Passengers by Airline(2015-2019).csv")
 
-dim(no_passengers)
-glimpse(no_passengers)
-
 names(no_passengers) <- str_replace_all(tolower(names(no_passengers)), "`","")
 names(no_passengers) <- str_replace_all(tolower(names(no_passengers)), " ","_")
+
+dim(no_passengers)
+glimpse(no_passengers)
 ```
 
 ```{r}
 ## Cancellation Fees
-cancel_fees <- read_csv("Final Flights Data/Res Cxl Fees(2015-2019).csv")
-
-dim(cancel_fees)
-glimpse(cancel_fees)
+cancel_fees <- read_csv("Final Flights Data/Res Cxl Fees(2015-2019).csv",
+                        col_types = cols(
+  Year = col_double(),
+  Quarter = col_character(),
+  American = col_double(),
+  Delta = col_double(),
+  United = col_double(),
+  JetBlue = col_double(),
+  Alaska = col_double(),
+  Spirit = col_double(),
+  Frontier = col_double(),
+  `Virgin America` = col_double(),
+  Hawaiian = col_double(),
+  `Sun Country` = col_double(),
+  Allegiant = col_double(),
+  `Island Air Hawaii` = col_double(),
+  `US Airways` = col_double()
+))
 
 names(cancel_fees) <- str_replace_all(tolower(names(cancel_fees)), "`","")
 names(cancel_fees) <- str_replace_all(tolower(names(cancel_fees)), " ","_")
+
+View(cancel_fees)
+dim(cancel_fees)
+glimpse(cancel_fees)
+
+```
+
+```{r fig.height= 10}
+airports_by_state <- airfare_df %>% group_by(state_name) %>% summarise(count = n(), avg_fare = mean(`average_fare_($)`))
+ggplot(airports_by_state) +
+  geom_col(aes(reorder(state_name, count), count, fill = avg_fare))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  coord_flip()
+```
+
+
+```{r}
+avg_fare_df <- airfare_df %>% group_by(year) %>% summarise(avg_fare = mean(`average_fare_($)`), count = n())
+
+ggplot(avg_fare_df, aes(year, avg_fare, fill = count)) +
+         geom_col()
+```
+```{r}
+airports_by_city <- airfare_df %>% group_by(city_name) %>% 
+  summarise(count = n(), avg_fare = mean(`average_fare_($)`)) %>% arrange(desc(count), desc(avg_fare))
+airp_by_city <- airports_by_city[1:35,]
+
+ggplot(airp_by_city) +
+  geom_col(aes(reorder(city_name, count), count, fill = avg_fare))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  coord_flip()
+```
+
+```{r fig.width= 10}
+names(time_per_airlines )
+time_per_year <- time_performance %>% group_by(year) %>% 
+  summarise(total_flights = sum(total_number, na.rm = T),
+            total_flights_cancelled = sum(total_number_cancelled, na.rm = T),
+            total_flights_diverted = sum(total_number_diverted, na.rm = T),
+            avg_dep_delay = mean(`average_departure_delay_(minutes)`, na.rm = T),
+            avg_taxi_out_time = mean(`average_taxi-out_time_(minutes)`, na.rm = T),
+            avg_arr_delay = mean(`average_arrival_delay_(minutes)`, na.rm = T),
+            weather_avg_delay = mean(`weather(avg._mins)`, na.rm = T),
+            national_aviation_system_avg_delay = mean(`national_aviation_system(avg._mins)`, na.rm = T),
+            security_avg_delay = mean(`security(avg._mins)`, na.rm = T),
+            late_aircraft_arrival_avg_delay = mean(`late_aircraft_arrival(avg._mins)`, na.rm = T))
+
+ggplot(time_per_year,aes(year, total_flights, fill = total_flights_cancelled))+
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r fig.width= 10}
+p1 <- ggplot(time_per_year,aes(year, total_flights, fill = weather_avg_delay))+
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+p2 <- ggplot(time_per_year,aes(year, total_flights, fill = national_aviation_system_avg_delay))+
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+p3 <- ggplot(time_per_year,aes(year, total_flights, fill = security_avg_delay))+
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+p4 <- ggplot(time_per_year,aes(year, total_flights, fill = late_aircraft_arrival_avg_delay))+
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+```{r fig.width=12, fig.height= 8}
+time_per_airlines <- time_performance %>% group_by(carriers) %>% 
+  summarise(total_flights = sum(total_number, na.rm = T),
+            total_flights_cancelled = sum(total_number_cancelled, na.rm = T),
+            total_flights_diverted = sum(total_number_diverted, na.rm = T),
+            avg_dep_delay = mean(`average_departure_delay_(minutes)`, na.rm = T),
+            avg_taxi_out_time = mean(`average_taxi-out_time_(minutes)`, na.rm = T),
+            avg_arr_delay = mean(`average_arrival_delay_(minutes)`, na.rm = T),
+            weather_avg_delay = mean(`weather(avg._mins)`, na.rm = T),
+            national_aviation_system_avg_delay = mean(`national_aviation_system(avg._mins)`, na.rm = T),
+            security_avg_delay = mean(`security(avg._mins)`, na.rm = T),
+            late_aircraft_arrival_avg_delay = mean(`late_aircraft_arrival(avg._mins)`, na.rm = T))
+
+p5 <- ggplot(time_per_airlines,aes(reorder(carriers,-weather_avg_delay), weather_avg_delay))+
+  geom_col(fill = "dark blue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+p6 <- ggplot(time_per_airlines,aes(reorder(carriers, -national_aviation_system_avg_delay), national_aviation_system_avg_delay))+
+  geom_col(fill = "dark green") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette="Dark2")
+
+p7 <- ggplot(time_per_airlines,aes(reorder(carriers, -security_avg_delay),security_avg_delay))+
+  geom_col(fill = "purple") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette="Dark2")
+
+p8 <- ggplot(time_per_airlines,aes(reorder(carriers, -late_aircraft_arrival_avg_delay), late_aircraft_arrival_avg_delay))+
+  geom_col(fill = "maroon") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette="Dark2")
+
+gridExtra::grid.arrange(p5, p6, p7, p8, nrow = 2)
+```
+
+```{r}
+ggplot(time_per_airlines,aes(reorder(carriers,-avg_dep_delay), avg_dep_delay))+
+  geom_col(fill = "purple") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+ggplot(time_per_airlines,aes(reorder(carriers,-total_flights), total_flights, fill = total_flights_diverted))+
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r fig.width= 8}
+lf_by_month <- loadfct_df %>% group_by(month) %>% summarise(alaska_airlines_avg = mean(alaska_airlines),
+                                             allegiant_airlines_avg = mean(allegiant_airlines),
+                                             american_airlines_avg = mean(american_airlines),
+                                             delta_airlines_avg = mean(delta_airlines),
+                                             frontier_airlines_avg = mean(frontier_airlines),
+                                             hawaiian_airlines_avg = mean(hawaiian_airlines),
+                                             jetblue_airlines_avg = mean(jetblue_airlines),
+                                             southwest_airlines_avg = mean(southwest_airlines),
+                                             spirit_airlines_avg = mean(spirit_airlines),
+                                             united_airlines_avg = mean(united_airlines))
+                                             
+                                        
+ggplot(lf_by_month)+
+  geom_line(aes(month,alaska_airlines_avg))+
+  geom_line(aes(month,allegiant_airlines_avg), col = "cornflowerblue") +
+  geom_line(aes(month,american_airlines_avg), col = "coral4") +
+  geom_line(aes(month,delta_airlines_avg), col = "greenyellow") +
+  geom_line(aes(month,frontier_airlines_avg), col = "deeppink4") +
+  geom_line(aes(month,hawaiian_airlines_avg), col = "darkseagreen4") +
+  geom_line(aes(month,jetblue_airlines_avg), col = "brown4") +
+  geom_line(aes(month,southwest_airlines_avg), col = "darkorchid4") +
+  geom_line(aes(month,spirit_airlines_avg), col = "orange4") +
+  geom_line(aes(month,united_airlines_avg), col = "olivedrab")+
+  scale_x_continuous(breaks=seq(1, 12, 1))
+
+```
+
+```{r}
+canc_fees_by_quarter <- cancel_fees %>% group_by(quarter) %>% summarise(alaska_avg = mean(alaska, na.rm = T),
+                                             allegiant_avg = mean(allegiant , na.rm = T),
+                                             american_avg = mean(american , na.rm = T),
+                                             delta_avg = mean(delta, na.rm = T),
+                                             frontier_avg = mean(frontier, na.rm = T),
+                                             hawaiian_avg = mean(hawaiian, na.rm = T),
+                                             jetblue_avg = mean(jetblue, na.rm = T),
+                                             virgin_america_avg = mean(virgin_america, na.rm = T),
+                                             spirit_avg = mean(spirit, na.rm = T),
+                                             united_avg = mean(united, na.rm = T),
+                                             sun_country_avg = mean(sun_country, na.rm = T),
+                                             island_air_hawaii_avg = mean(us_airways, na.rm = T),
+                                             us_airways_avg = mean(us_airways, na.rm = T))
+                                             
+                                        
+ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,alaska_avg))+
+  geom_line(aes(quarter,allegiant_avg), col = "cornflowerblue") +
+  geom_line(aes(quarter,american_avg), col = "coral4") +
+  geom_line(aes(quarter,delta_avg), col = "greenyellow") +
+  geom_line(aes(quarter,frontier_avg), col = "deeppink4") +
+  geom_line(aes(quarter,hawaiian_avg), col = "darkseagreen4") +
+  geom_line(aes(quarter,jetblue_avg), col = "brown4") +
+  geom_line(aes(quarter,virgin_america_avg), col = "darkorchid4") +
+  geom_line(aes(quarter,spirit_avg), col = "orange4") +
+  geom_line(aes(quarter,united_avg), col = "olivedrab")+
+  geom_line(aes(quarter,sun_country_avg), col = "red")+
+  geom_line(aes(quarter,island_air_hawaii_avg), col = "blue")+
+    geom_line(aes(quarter,us_airways_avg), col = "pink")
 ```
 
