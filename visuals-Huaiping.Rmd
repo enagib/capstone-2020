@@ -1,0 +1,203 @@
+---
+title: "888_Huaiping"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(purrrlyr)
+library(readr)
+library(readxl)
+library(tibble)
+library(stringr)
+library(dplyr)
+library(ggthemes)
+library(ggplot2)
+library(ggrepel)
+library("xlsx")
+  
+#names(airport)
+
+## No. Passengers Table
+num_passengers <- read_csv("Final Flights Data/Number of Passengers by Airline(2015-2019).csv")
+
+names(num_passengers) <- str_replace_all(tolower(names(num_passengers)), "`","")
+names(num_passengers) <- str_replace_all(tolower(names(num_passengers)), " ","_")
+
+#dim(num_passengers)
+#glimpse(num_passengers)
+
+
+row_handler <- function(row.data){  
+  index <- which(row.data == max(row.data))  # 找出最大的元素的index
+  out <- names(row.data[index]) %>% # 从index还原成列名
+    str_c(collapse = ",") # 拼接
+  return(out)
+}
+Max_name1 <- num_passengers %>%
+  by_row(..f = row_handler, .collate = "rows", .to = "Max_name1") 
+
+row_handler1 <- function(row.data){  
+  index <- which(row.data == max(row.data))  # 找出最大的元素的index
+  out1 <- (row.data[index]) %>% # 
+    str_c(collapse = ",") # 拼接
+  return(out1)
+}
+
+Max_num1 <- num_passengers %>%
+  by_row(..f = row_handler1, .collate = "rows", .to = "Max_num1") 
+
+num_passengers1 <- merge(Max_name1, Max_num1)
+
+num_passengers22 <- num_passengers %>%  select(-"southwest")
+
+Max_name2 <- num_passengers22 %>%
+  by_row(..f = row_handler, .collate = "rows", .to = "Max_name2") 
+
+Max_num2 <- num_passengers22 %>%
+  by_row(..f = row_handler1, .collate = "rows", .to = "Max_num2") 
+
+num_passengers2 <- merge(Max_name2, Max_num2)
+
+num_passengers_max12 <- merge(num_passengers1, num_passengers2)
+#names(num_passengers_max12)
+
+```
+
+```{r}
+num_passengers_max12_2015 <- num_passengers_max12 %>% filter(year == 2015)
+
+p2_2015 <- ggplot(num_passengers_max12_2015, aes(factor(month), Max_num2, fill = Max_name2)) + 
+  geom_col(position = 'dodge') + ggtitle("No.2 Max Load of Passengers in 2015")
+
+p1_2015 <- ggplot(num_passengers_max12_2015, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Max Load of Passengers in 2015")
+
+gridExtra::grid.arrange(p1_2015, p2_2015)
+```
+
+```{r}
+num_passengers_max12_2016 <- num_passengers_max12 %>% filter(year == 2016)
+
+
+#names(num_passengers_max12)
+p2_2016 <- ggplot(num_passengers_max12_2016, aes(factor(month), Max_num2, fill = Max_name2)) + 
+  geom_col(position = 'dodge') + ggtitle("No.2 Max Load of Passengers in 2016")
+
+p1_2016 <- ggplot(num_passengers_max12_2016, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Max Load of Passengers in 2016")
+
+gridExtra::grid.arrange(p1_2016, p2_2016)
+
+```
+
+```{r}
+num_passengers_max12_2017 <- num_passengers_max12 %>% filter(year == 2017)
+
+#names(num_passengers_max12)
+p2_2017 <- ggplot(num_passengers_max12_2017, aes(factor(month), Max_num2, fill = Max_name2)) + 
+  geom_col(position = 'dodge') + ggtitle("No.2 Max Load of Passengers in 2017")
+
+p1_2017 <- ggplot(num_passengers_max12_2017, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Max Load of Passengers in 2017")
+
+gridExtra::grid.arrange(p1_2017, p2_2017)
+```
+
+```{r}
+num_passengers_max12_2018 <- num_passengers_max12 %>% filter(year == 2018)
+
+#names(num_passengers_max12)
+p2_2018 <- ggplot(num_passengers_max12_2018, aes(factor(month), Max_num2, fill = Max_name2)) + 
+  geom_col(position = 'dodge') + ggtitle("No.2 Max Load of Passengers in 2018")
+
+p1_2018 <- ggplot(num_passengers_max12_2018, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Max Load of Passengers in 2018")
+
+gridExtra::grid.arrange(p1_2018, p2_2018)
+```
+
+```{r}
+num_passengers_max12_2019 <- num_passengers_max12 %>% filter(year == 2019)
+
+#names(num_passengers_max12)
+p2_2019 <- ggplot(num_passengers_max12_2019, aes(factor(month), Max_num2, fill = Max_name2)) + 
+  geom_col(position = 'dodge') + ggtitle("No.2 Max Load of Passengers in 2018")
+
+p1_2019 <- ggplot(num_passengers_max12_2019, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Max Load of Passengers in 2018")
+
+gridExtra::grid.arrange(p1_2019, p2_2019)
+```
+
+```{r}
+airport <- read_xlsx("Final Flights Data/Airfare(2015-2019).xlsx")
+airport$`Airport Code` = as.factor(airport$`Airport Code`)
+Avg <- airport %>% 
+ group_by(`Airport Code`) %>% 
+  summarise(Avgfair = mean(`Average Fare ($)`)) %>% top_n(10)
+pp <- Avg %>% ggplot(aes(x=reorder(`Airport Code`,Avgfair), Avgfair)) +
+  geom_bar(stat="identity") + coord_flip() +
+  theme_fivethirtyeight() + 
+  ggtitle("Top 10 Average Fare by Airport")
+pp
+```
+
+
+```{r}
+
+load_fct <- read_csv("Final Flights Data/Load Factor by Airline(2015-2019).csv")
+
+names(load_fct) <- str_replace_all(tolower(names(load_fct)), "`","")
+names(load_fct) <- str_replace_all(tolower(names(load_fct)), " ","_")
+
+load_fct$year <- as.factor(load_fct$year)
+load_fct$month <- as.factor(load_fct$month)
+
+load_fct1 <- load_fct %>% select(-"year", -"month")
+
+load_max_name1 <- load_fct1 %>%
+  by_row(..f = row_handler, .collate = "rows", .to = "Max_name1") 
+load_max_num1 <- load_fct1 %>%
+  by_row(..f = row_handler1, .collate = "rows", .to = "Max_num1") 
+
+load_fct1 <- merge(load_max_name1, load_max_num1)
+#View(load_fct11)
+load_fct11 <- merge(load_fct, load_fct1)
+
+```
+
+```{r}
+load_fct_max1_2015 <- load_fct11 %>% filter(year == 2015)
+
+ppp1_2015 <- ggplot(load_fct_max1_2015, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Load Factor in 2015")
+
+load_fct_max1_2016 <- load_fct11 %>% filter(year == 2016)
+
+ppp1_2016 <- ggplot(load_fct_max1_2016, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Load Factor in 2016")
+
+load_fct_max1_2017 <- load_fct11 %>% filter(year == 2017)
+
+ppp1_2017 <- ggplot(load_fct_max1_2017, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Load Factor in 2017")
+
+load_fct_max1_2018 <- load_fct11 %>% filter(year == 2018)
+
+ppp1_2018 <- ggplot(load_fct_max1_2018, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Load Factor in 2018")
+
+load_fct_max1_2019 <- load_fct11 %>% filter(year == 2019)
+
+ppp1_2019 <- ggplot(load_fct_max1_2019, aes(factor(month), Max_num1, fill = Max_name1)) + 
+  geom_col(position = 'dodge') + ggtitle("No.1 Load Factor in 2019")
+
+gridExtra::grid.arrange(ppp1_2015, ppp1_2016,ppp1_2017,ppp1_2018,ppp1_2019)
+
+```
+
