@@ -21,23 +21,35 @@ delays <- read_csv("Final Flights Data/Airline on-time perform(2015-2019).csv")
 ```{r}
 flight_num <- read_csv("Final Flights Data/Number of Flights(2015-2019).csv") %>% na.omit()
 colnames(flight_num) <- tolower(gsub(" ", "_", colnames(flight_num)))
+```
+ 
+```{r}
 flight_num %>% 
   pivot_longer(cols = "alaska_airlines" : "united_airlines", names_to = "flight", values_to = "number") -> flight_num2
 
 flight_num2 %>% filter(year == 2019) %>% 
   ggplot() +
-  geom_line(aes(month, number, color = flight), size = 1)
+  geom_line(aes(month, number, color = flight), size = 1) +
+  labs(title = "Number of Flights per Month in 2019")
 ```
- 
+
 
 ```{r message=FALSE, warning=FALSE}
 ggplot(flight_num2) +
-  geom_line(aes(month, number, frame = year, color = flight)) -> p
+  geom_line(aes(month, number, frame = year, color = flight)) +
+  labs(title = "Number of Flights per Month per Year")-> p
 ggplotly(p)
 ```
-Southwest airlines have the most airlines over 2015 to 2019, and frontier_airlines is the second. The trend does not change much. 
+Southwest airlines have the most airlines over 2015 to 2019, and frontier_airlines is the second. The trend does not change much.
 
-percent change in flight 
+```{r}
+flight_num2 %>% 
+  group_by(flight, year) %>% 
+  summarise(number = mean(number)) %>% 
+  arrange(year, desc(number)) %>% pivot_wider(names_from = "year", values_from = number) 
+
+```
+
 
 
 
