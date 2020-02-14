@@ -14,10 +14,7 @@ library(plotly)
 
 
 **Read in data**
-```{r}
-delays <- read_csv("Final Flights Data/Airline on-time perform(2015-2019).csv") 
 
-```
 ```{r}
 flight_num <- read_csv("Final Flights Data/Number of Flights(2015-2019).csv") %>% na.omit()
 colnames(flight_num) <- tolower(gsub(" ", "_", colnames(flight_num)))
@@ -49,11 +46,57 @@ flight_num2 %>%
   arrange(year, desc(number)) %>% pivot_wider(names_from = "year", values_from = number) 
 
 ```
+**Delays**
+```{r}
+delays <- read_csv("Final Flights Data/Airline on-time perform(2015-2019).csv")  %>% 
+  mutate()
+colnames(delays) <- tolower(gsub(" ", "_", colnames(delays)))
+```
+
+delays due to what reason? 
+```{r}
+delays2 <- delays %>% pivot_longer(cols = "carrier_(avg._mins)" : "late_aircraft_arrival(avg._mins)", names_to = "reason", 
+                        values_to = "minutes") 
+
+
+delays2$minutes <- as.numeric(delays2$minutes)
+na.omit(delays2)
+
+reason <- delays2 %>% spread(key = reason, value = minutes, fill = 0) %>% 
+  gather("carrier_(avg._mins)":"late_aircraft_arrival(avg._mins)", key = "reason", value = "minutes" ) %>% group_by(year, carriers, reason) %>% 
+  summarise(minutes = mean(minutes)) %>% ungroup() -> reasons
+
+reasons %>% group_by(year) %>% arrange(year, desc(minutes)) %>% mutate(rank = row_number())  %>% ungroup() %>% filter(rank <= 3) %>%
+  ggplot() +
+  geom_col(aes(year, minutes, fill = carriers), position = "dodge")
+```
+
+note: lack the information of Allegiant Airlines in 2015, 2016
+delays %>% filter(carriers == "Allegiant Airlines") %>% View
+for now: i just use na.omit
+
+
+overall: 
+```{r}
+reasons %>% group_by(year) %>% arrange(year, desc(minutes)) %>% mutate(rank = row_number())  %>% ungroup() %>% filter(rank <= 3) %>% 
+  ggplot() +
+  geom_col(aes(year, minutes, fill = reason, color = carriers), position = "dodge", size = 1.5) +
+  scale_fill_manual("legend", values = c("carrier_(avg._mins)" = "gray", "late_aircraft_arrival(avg._mins)" = "lightblue")) + 
+  labs(title = "Delay Reasons") 
+```
+most delays over 5 years are due to carriers and late aircraft arrival
+seems to be a common problem among all airlines
+
+delay reason by year and airline
+```{r}
+reasons %>% group_by(year, carriers) %>% arrange(year, carriers, desc(minutes))
+```
 
 
 
 
 ```{r}
+# sample code
 # movies %>% group_by(release_year, genre) %>%
 #   count() %>% arrange(release_year, desc(n)) %>% 
 #   spread(key = genre, value = n, fill = 0) %>% 
