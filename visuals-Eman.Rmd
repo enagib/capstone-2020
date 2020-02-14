@@ -195,6 +195,7 @@ ggplot(airp_by_city) +
 ```
 
 ```{r fig.width= 10}
+View(time_performance)
 names(time_per_airlines )
 time_per_year <- time_performance %>% group_by(year) %>% 
   summarise(total_flights = sum(total_number, na.rm = T),
@@ -305,7 +306,7 @@ ggplot(lf_by_month)+
 
 ```
 
-```{r}
+```{r fig.width= 10, fig.height=10}
 canc_fees_by_quarter <- cancel_fees %>% group_by(quarter) %>% summarise(alaska_avg = mean(alaska, na.rm = T),
                                              allegiant_avg = mean(allegiant , na.rm = T),
                                              american_avg = mean(american , na.rm = T),
@@ -321,19 +322,45 @@ canc_fees_by_quarter <- cancel_fees %>% group_by(quarter) %>% summarise(alaska_a
                                              us_airways_avg = mean(us_airways, na.rm = T))
                                              
                                         
-ggplot(canc_fees_by_quarter)+
-  geom_col(aes(quarter,alaska_avg))+
-  geom_line(aes(quarter,allegiant_avg), col = "cornflowerblue") +
-  geom_line(aes(quarter,american_avg), col = "coral4") +
-  geom_line(aes(quarter,delta_avg), col = "greenyellow") +
-  geom_line(aes(quarter,frontier_avg), col = "deeppink4") +
-  geom_line(aes(quarter,hawaiian_avg), col = "darkseagreen4") +
-  geom_line(aes(quarter,jetblue_avg), col = "brown4") +
-  geom_line(aes(quarter,virgin_america_avg), col = "darkorchid4") +
-  geom_line(aes(quarter,spirit_avg), col = "orange4") +
-  geom_line(aes(quarter,united_avg), col = "olivedrab")+
-  geom_line(aes(quarter,sun_country_avg), col = "red")+
-  geom_line(aes(quarter,island_air_hawaii_avg), col = "blue")+
-    geom_line(aes(quarter,us_airways_avg), col = "pink")
+q1 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,alaska_avg))
+
+q2 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,allegiant_avg), fill = "cornflowerblue") 
+
+q3 <- ggplot(canc_fees_by_quarter)+    
+  geom_col(aes(quarter,american_avg), fill = "coral4") 
+
+q4 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,delta_avg), fill = "greenyellow") 
+
+q5 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,frontier_avg), fill = "deeppink4") 
+
+q6 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,hawaiian_avg), fill = "darkseagreen4") 
+
+q7 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,jetblue_avg), fill = "brown4") 
+
+q8 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,virgin_america_avg), fill = "darkorchid4") 
+
+q9 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,spirit_avg), fill = "orange4") 
+
+q10 <- ggplot(canc_fees_by_quarter)+
+  geom_col(aes(quarter,united_avg), fill = "olivedrab")
+  
+q11 <- ggplot(canc_fees_by_quarter)+  
+  geom_col(aes(quarter,sun_country_avg), fill = "red")
+  
+q12 <- ggplot(canc_fees_by_quarter)+  
+  geom_col(aes(quarter,island_air_hawaii_avg), fill = "blue")
+  
+q13 <- ggplot(canc_fees_by_quarter)+  
+    geom_col(aes(quarter,us_airways_avg), fill = "pink")
+
+gridExtra::grid.arrange(q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, nrow=4)
 ```
 
