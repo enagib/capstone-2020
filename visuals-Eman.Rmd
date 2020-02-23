@@ -19,79 +19,28 @@ library(dplyr)
 ## Airfare Table
 airfare_df <- read_excel("Final Flights Data/Airfare(2015-2019).xlsx")
 
-dim(airfare_df)
-glimpse(airfare_df)
-
 names(airfare_df) <- str_replace_all(tolower(names(airfare_df)), "`","")
 names(airfare_df) <- str_replace_all(tolower(names(airfare_df)), " ","_")
+names(airfare_df) <- gsub("[()]", "", names(airfare_df))
+names(airfare_df) <- gsub("[_$]", "", names(airfare_df))
+
+glimpse(airfare_df)
 ```
 
 ```{r}
 ## On-time Performance Table
-time_performance <- read_csv("Final Flights Data/Airline on-time perform(2015-2019).csv")
-#View(time_performance)
-
-names(time_performance)
-glimpse(time_performance)
+time_performance <- read_csv("Final Flights Data/Airline on-time perform(2015-2019).csv", guess_max = 1000)
 
 names(time_performance) <- str_replace_all(tolower(names(time_performance)), "`","")
 names(time_performance) <- str_replace_all(tolower(names(time_performance)), " ","_")
+names(time_performance) <- str_replace_all(tolower(names(time_performance)), "-","_")
+names(time_performance) <- str_replace_all(tolower(names(time_performance)), "[.]","")
+names(time_performance) <- gsub("[()]", "", names(time_performance))
+time_performance[time_performance == "N`A"] <- NA
 
+time_performance[,3:21] <- lapply(time_performance[,3:21], as.double)
 
-time_performance$total_number <- 
-  as.integer(gsub(",","",time_performance$total_number))
-
-time_performance$`average_departure_delay_(minutes)` <- 
-  as.double(gsub(",","",time_performance$`average_departure_delay_(minutes)`))
-
-time_performance$`average_taxi-out_time_(minutes)` <- 
-  as.double(gsub(",","", time_performance$`average_taxi-out_time_(minutes)`))
-
-time_performance$`average_scheduled_departure_to_take-off_(minutes)`<- as.double(gsub(",","",time_performance$`average_scheduled_departure_to_take-off_(minutes)`))
-
-time_performance$`average_arrival_delay_(minutes)`<- 
-  as.double(gsub(",","",time_performance$`average_arrival_delay_(minutes)`))
-
-time_performance$`average_airborne_time_(minutes)`<- 
-  as.double(gsub(",","",time_performance$`average_airborne_time_(minutes)`))
-
-time_performance$`average_taxi-in_time_(minutes)`<- 
-  as.double(gsub(",","",time_performance$`average_taxi-in_time_(minutes)`))
-
-time_performance$total_number_cancelled<- 
-  as.double(gsub(",","",time_performance$total_number_cancelled))
-
-time_performance$percent_flights_cancelled<- 
-  as.double(gsub(",","",time_performance$percent_flights_cancelled))
-
-time_performance$total_number_diverted<- 
-  as.double(gsub(",","",time_performance$total_number_diverted))
-
-time_performance$percent_flights_diverted<- 
-  as.double(gsub(",","",time_performance$percent_flights_diverted))
-
-time_performance$diverted_flights_reaching_scheduled_destination<- as.double(gsub(",","",time_performance$diverted_flights_reaching_scheduled_destination))
-
-time_performance$`diverted_flights_(mins)`<- 
-  as.double(gsub(",","",time_performance$`diverted_flights_(mins)`))
-
-time_performance$`cancelled_flights_(mins)` <- 
-  as.double(gsub(",","",time_performance$`cancelled_flights_(mins)`))
-
-time_performance$`carrier_(avg._mins)`<- 
-  as.double(gsub(",","",time_performance$`carrier_(avg._mins)`))
-
-time_performance$`weather(avg._mins)`<- 
-  as.double(gsub(",","",time_performance$`weather(avg._mins)`))
-
-time_performance$`national_aviation_system(avg._mins)`<- 
-  as.double(gsub(",","",time_performance$`national_aviation_system(avg._mins)`))
-
-time_performance$`security(avg._mins)` <- 
-  as.double(gsub(",","",time_performance$`security(avg._mins)` ))
-
-time_performance$`late_aircraft_arrival(avg._mins)` <- 
-  as.double(gsub(",","",time_performance$`late_aircraft_arrival(avg._mins)`))
+glimpse(time_performance)
 ```
 
 ```{r}
@@ -99,11 +48,15 @@ time_performance$`late_aircraft_arrival(avg._mins)` <-
 delay_reasons <- read_csv("Final Flights Data/Delay Reasons by airline(2015-2019).csv", skip = 1)
 
 delay_reasons$X11 <- NULL
-dim(delay_reasons)
-glimpse(delay_reasons)
 
 names(delay_reasons) <- str_replace_all(tolower(names(delay_reasons)), "`","")
 names(delay_reasons) <- str_replace_all(tolower(names(delay_reasons)), " ","_")
+names(delay_reasons) <- str_replace_all(tolower(names(delay_reasons)), "-","")
+names(delay_reasons) <- gsub("[()]", "", names(delay_reasons))
+delay_reasons[delay_reasons == "N/A"] <- NA
+delay_reasons[,3:10] <- lapply(delay_reasons[,3:10], as.double)
+
+glimpse(delay_reasons)
 ```
 
 ```{r}
@@ -113,9 +66,9 @@ loadfct_df <- read_csv("Final Flights Data/Load Factor by Airline(2015-2019).csv
 names(loadfct_df) <- str_replace_all(tolower(names(loadfct_df)), "`","")
 names(loadfct_df) <- str_replace_all(tolower(names(loadfct_df)), " ","_")
 
-dim(loadfct_df)
 glimpse(loadfct_df)
 ```
+
 ```{r}
 ## No. Flights Table
 no_flights <- read_csv("Final Flights Data/Number of Flights(2015-2019).csv")
@@ -123,7 +76,8 @@ no_flights <- read_csv("Final Flights Data/Number of Flights(2015-2019).csv")
 names(no_flights) <- str_replace_all(tolower(names(no_flights)), "`","")
 names(no_flights) <- str_replace_all(tolower(names(no_flights)), " ","_")
 
-dim(no_flights)
+no_flights <- na.omit(no_flights)
+
 glimpse(no_flights)
 ```
 
@@ -134,69 +88,49 @@ no_passengers <- read_csv("Final Flights Data/Number of Passengers by Airline(20
 names(no_passengers) <- str_replace_all(tolower(names(no_passengers)), "`","")
 names(no_passengers) <- str_replace_all(tolower(names(no_passengers)), " ","_")
 
-dim(no_passengers)
 glimpse(no_passengers)
 ```
 
 ```{r}
 ## Cancellation Fees
-cancel_fees <- read_csv("Final Flights Data/Res Cxl Fees(2015-2019).csv",
-                        col_types = cols(
-  Year = col_double(),
-  Quarter = col_character(),
-  American = col_double(),
-  Delta = col_double(),
-  United = col_double(),
-  JetBlue = col_double(),
-  Alaska = col_double(),
-  Spirit = col_double(),
-  Frontier = col_double(),
-  `Virgin America` = col_double(),
-  Hawaiian = col_double(),
-  `Sun Country` = col_double(),
-  Allegiant = col_double(),
-  `Island Air Hawaii` = col_double(),
-  `US Airways` = col_double()
-))
+cancel_fees <- read_csv("Final Flights Data/Res Cxl Fees(2015-2019).csv")
 
 names(cancel_fees) <- str_replace_all(tolower(names(cancel_fees)), "`","")
 names(cancel_fees) <- str_replace_all(tolower(names(cancel_fees)), " ","_")
+cancel_fees[cancel_fees == "N/A"] <- NA
+cancel_fees[,3:15] <- lapply(cancel_fees[,3:15], as.double)
 
-View(cancel_fees)
 dim(cancel_fees)
 glimpse(cancel_fees)
-
 ```
 
 ```{r fig.height= 10}
-airports_by_state <- airfare_df %>% group_by(state_name) %>% summarise(count = n(), avg_fare = mean(`average_fare_($)`))
+airports_by_state <- airfare_df %>% group_by(statename) %>% summarise(count = n(), avg_fare = mean(averagefare))
 ggplot(airports_by_state) +
-  geom_col(aes(reorder(state_name, count), count, fill = avg_fare))+
+  geom_col(aes(reorder(statename, count), count, fill = avg_fare))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   coord_flip()
 ```
 
 
 ```{r}
-avg_fare_df <- airfare_df %>% group_by(year) %>% summarise(avg_fare = mean(`average_fare_($)`), count = n())
+avg_fare_df <- airfare_df %>% group_by(year) %>% summarise(avg_fare = mean(averagefare), count = n())
 
 ggplot(avg_fare_df, aes(year, avg_fare, fill = count)) +
          geom_col()
 ```
 ```{r}
-airports_by_city <- airfare_df %>% group_by(city_name) %>% 
-  summarise(count = n(), avg_fare = mean(`average_fare_($)`)) %>% arrange(desc(count), desc(avg_fare))
+airports_by_city <- airfare_df %>% group_by(cityname) %>% 
+  summarise(count = n(), avg_fare = mean(averagefare)) %>% arrange(desc(count), desc(avg_fare))
 airp_by_city <- airports_by_city[1:35,]
 
 ggplot(airp_by_city) +
-  geom_col(aes(reorder(city_name, count), count, fill = avg_fare))+
+  geom_col(aes(reorder(cityname, count), count, fill = avg_fare))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   coord_flip()
 ```
 
 ```{r fig.width= 10}
-View(time_performance)
-names(time_per_airlines )
 time_per_year <- time_performance %>% group_by(year) %>% 
   summarise(total_flights = sum(total_number, na.rm = T),
             total_flights_cancelled = sum(total_number_cancelled, na.rm = T),
@@ -212,6 +146,8 @@ time_per_year <- time_performance %>% group_by(year) %>%
 ggplot(time_per_year,aes(year, total_flights, fill = total_flights_cancelled))+
   geom_col() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+names(time_pe)
 ```
 
 
