@@ -37,7 +37,7 @@ with(flights_2015, table(labor_day))
 with(flights_2015, table(thanksgiving))
 with(flights_2015, table(winter_holiday))
 
-
+write_csv(flights_2015, "/Users/Eman Nagib/Documents/capstone-local/flights_2015_w_holidays.csv")
 
 
 
@@ -75,7 +75,7 @@ with(flights_2016, table(thanksgiving))
 with(flights_2016, table(winter_holiday))
 
 
-
+write_csv(flights_2016, "/Users/Eman Nagib/Documents/capstone-local/flights_2016_w_holidays.csv")
 
 
 
@@ -117,6 +117,7 @@ with(flights_2017, table(thanksgiving))
 with(flights_2017, table(winter_holiday))
 
 
+write_csv(flights_2017, "/Users/Eman Nagib/Documents/capstone-local/flights_2017_w_holidays.csv")
 
 
 
@@ -157,6 +158,11 @@ with(flights_2018, table(labor_day))
 with(flights_2018, table(thanksgiving))
 with(flights_2018, table(winter_holiday))
 
+write_csv(flights_2018, "/Users/Eman Nagib/Documents/capstone-local/flights_2018_w_holidays.csv")
+
+
+
+
 
 
 
@@ -167,7 +173,6 @@ flights_2018$X1 <- NULL
 
 flights_2019$FL_DATE <- as.Date(flights_2019$FL_DATE ,format="%m/%d/%Y")
 flights_2019$FL_DATE <- format(as.Date(flights_2019$FL_DATE), "%m/%d/%Y")
-
 
 ##HOLIDAYS DATES
 presidents_day <- format(seq(as.Date("2019/2/14"), as.Date("2019/2/19"), by="days"), format="%m/%d/%Y")
@@ -195,3 +200,5 @@ with(flights_2019, table(independence_day))
 with(flights_2019, table(labor_day))
 with(flights_2019, table(thanksgiving))
 with(flights_2019, table(winter_holiday))
+
+write_csv(flights_2019, "/Users/Eman Nagib/Documents/capstone-local/flights_2019_w_holidays.csv")
