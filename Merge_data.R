@@ -1,5 +1,4 @@
 library(readr)
-library(git2r)
 
 flights_2015 <- read_csv("bigdata/flights_2015_w_holidays.csv")
 flights_2016 <- read_csv("bigdata/flights_2016_w_holidays.csv")
