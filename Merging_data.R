@@ -29,5 +29,11 @@ weather <- weather %>% rename("day" = da, "month" = mo, "origin" = CALL_ID)
 weather$date <- gsub('\\s+', '', (paste(weather$month,"/",weather$day,"/", weather$year)))
 weather <- weather %>% select(-c(count_temp,count_dewp,count_slp,count_stp,count_visib,count_wdsp))
 
+data1 <- flights %>% left_join(weather, by = c("origin","date"))
 
-data <- flights %>% left_join(flights, by = c("origin","date"))
+####################################################################################
+#Final data set
+####################################################################################
+write_csv(data, "bigdata/flights_data.csv")
+data <- read_csv("bigdata/flights_data.csv")
+
