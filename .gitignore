@@ -6,3 +6,5 @@ bigdata
 ml_data.csv
 full_data.csv
 station_weather_airport.csv
+.RDataTmp
+.RDataTmp1
