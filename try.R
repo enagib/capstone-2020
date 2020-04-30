@@ -93,14 +93,21 @@ yhat_train_l <- predict(fit_linear, dd_train)
 rmse_train_l <- (mean((dd_train$total_dep_delay2 - yhat_train_l) ^ 2))^0.5
 
 
+small_data_dep <- read_csv('bigdata2/dep_small_data.csv')
+train_small <- sample(1:nrow(small_data_dep), 0.8*nrow(small_data_dep))
+train_dep <- small_data_dep[train_small, ]
+test_dep <- small_data_dep[-train_small, ]
+
+
+
 ### forward selection
-xnames <- colnames(dd_train)
-xnames <- xnames[!xnames %in% 'total_dep_delay2']
-fit_fw <- lm(total_dep_delay2 ~ 1, data = dd_train)
-yhat_train <- predict(fit_fw, dd_train)
-yhat_test <- predict(fit_fw, dd_test)
-rmse_train <- (mean((dd_train$total_dep_delay2 - yhat_train) ^ 2))^0.5
-rmse_test <- (mean((dd_test$total_dep_delay2 - yhat_test) ^ 2)) ^ 0.5
+xnames <- colnames(train_dep)
+xnames <- xnames[!xnames %in% 'total_dep_delay']
+fit_fw <- lm(total_dep_delay ~ 1, data = train_dep)
+yhat_train <- predict(fit_fw, train_dep)
+yhat_test <- predict(fit_fw, test_dep)
+rmse_train <- (mean((train_dep$total_dep_delay - yhat_train) ^ 2))^0.5
+rmse_test <- (mean((test_dep$total_dep_delay - yhat_test) ^ 2)) ^ 0.5
 xname <- "intercept"
 
 
@@ -121,11 +128,11 @@ while (length(xnames) > 0) {
   ## select the nest best predictor 
   for (xname in xnames) {
     fit_fw_tmp <- update(fit_fw, as.formula(paste0(". ~ . + ", xname)))
-    yhat_train_tmp <- predict(fit_fw_tmp, dd_train)
-    rmse_train_tmp <- (mean((dd_train$total_dep_delay2 - yhat_train_tmp) ^ 2))^0.5
+    yhat_train_tmp <- predict(fit_fw_tmp, train_dep)
+    rmse_train_tmp <- (mean((train_dep$total_dep_delay - yhat_train_tmp) ^ 2))^0.5
     # compute MSE test
-    yhat_test_tmp <- predict(fit_fw_tmp, dd_test)
-    rmse_test_tmp <- (mean((dd_test$total_dep_delay2 - yhat_test_tmp) ^ 2))^0.5
+    yhat_test_tmp <- predict(fit_fw_tmp, test_dep)
+    rmse_test_tmp <- (mean((test_dep$total_dep_delay - yhat_test_tmp) ^ 2))^0.5
     # if this is the first predictor to be examined,
     # or if this predictors yields a lower MSE that the current
     # best, then store this predictor as the current best predictor
@@ -150,7 +157,7 @@ while (length(xnames) > 0) {
 }
 
 ## save the result 
-save(log_fw, file = "bigdata/forward_selection_new.RData")
+save(log_fw, file = "bigdata/forward_selection_dep.RData")
 
 ## result plot 
 log_fw$index <- seq(1, nrow(log_fw), by = 1)
