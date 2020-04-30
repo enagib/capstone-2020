@@ -5,27 +5,39 @@ library(tidyverse)
 dd_unw <- read_csv('bigdata/unwinsor_big_data.csv')
 
 range(dd_unw$total_dep_delay)
+## the 99th percentile: 195 minutes
 qrt_99 <- quantile(dd_unw$total_dep_delay, probs = 0.99) 
+## the 1th percentile: 0 minute
+qrt_01 <- quantile(dd_unw$total_dep_delay, probs = 0.01)
 
-dd_unw %>% 
-  filter(total_dep_delay >= qrt_99) %>% 
-  group_by(op_unique_carrier, origin, dest) %>% 
-  summarise(count = n())
+## for those departure on time or earlier, we replce the value by 0
 
-dd_unw %>% filter(op_unique_carrier == 'AA', 
-                  origin == "ABQ",
-                  dest == 'DFW') %>% select(total_dep_delay) %>% summary
+### check the data, how many depayed more than qrt_99
+# dd_unw %>% 
+#   filter(total_dep_delay >= qrt_99) %>% 
+#   group_by(op_unique_carrier, origin, dest) %>% 
+#   summarise(count = n())
+# 
+# dd_unw %>% 
+#   filter(total_dep_delay <= qrt_01) %>% 
+#   group_by(op_unique_carrier, origin, dest) %>% View()
+# 
+# dd_unw %>% filter(op_unique_carrier == 'AA', 
+#                   origin == "ABQ",
+#                   dest == 'DFW') %>% select(total_dep_delay) %>% summary
 
 a <- dd_unw %>% filter(total_dep_delay <= qrt_99) %>% 
   group_by(op_unique_carrier, origin, dest) %>% 
-  summarise(average = mean(total_dep_delay)) %>% ungroup() 
+  summarise(med = median(total_dep_delay)) %>% ungroup() 
 
 dd_unw2 <- inner_join(dd_unw, a, by = c("op_unique_carrier", "origin", "dest"))
 
-ml_dd <- dd_unw2 %>% mutate(total_dep_delay2 = ifelse(total_dep_delay >= qrt_99, average, total_dep_delay))
-ml_dd$total_dep_delay2 %>% range
+ml_dd <- dd_unw2 %>% 
+  mutate(total_dep_delay2 = ifelse(total_dep_delay >= qrt_99, med, total_dep_delay)) %>% 
+  mutate(total_dep_delay2 = ifelse(total_dep_delay2 <= qrt_01, 0, total_dep_delay2))
+# ml_dd$total_dep_delay2 %>% range
 
-ml_data3 <- ml_dd %>% select(-c(arr_delay, month, day_of_week, total_dep_delay, average, op_unique_carrier))
+ml_data3 <- ml_dd %>% select(-c(arr_delay, month, day_of_week, total_dep_delay, med, op_unique_carrier))
 train <- sample(1:nrow(ml_data3), 0.8*nrow(ml_data3))
 dd_train <- ml_data3[train, ]
 dd_test <- ml_data3[-train, ]
@@ -38,33 +50,38 @@ rmse_train_l <- (mean((dd_train$total_dep_delay2 - yhat_train_l) ^ 2))^0.5
 
 
 #### do the forward selection with the small data 
+setwd("~/capstone2020")
 small_data_u <- read_csv('bigdata/unwinsor_data.csv')
 
 
 #### data cleaning
 range(small_data_u$total_dep_delay)
 qrt_99 <- quantile(small_data_u$total_dep_delay, probs = 0.99) 
+## the 1th percentile: 0 minute
+qrt_01 <- quantile(dd_unw$total_dep_delay, probs = 0.01)
 
-small_data_u %>% 
-  filter(total_dep_delay >= qrt_99) %>% 
-  group_by(op_unique_carrier, origin, dest) %>% 
-  summarise(count = n())
-
-small_data_u %>% filter(op_unique_carrier == 'AA', 
-                  origin == "ABQ",
-                  dest == 'DFW') %>% select(total_dep_delay) %>% summary
+# small_data_u %>% 
+#   filter(total_dep_delay >= qrt_99) %>% 
+#   group_by(op_unique_carrier, origin, dest) %>% 
+#   summarise(count = n())
+# 
+# small_data_u %>% filter(op_unique_carrier == 'AA', 
+#                   origin == "ABQ",
+#                   dest == 'DFW') %>% select(total_dep_delay) %>% summary
 
 a2 <- small_data_u %>% filter(total_dep_delay <= qrt_99) %>% 
   group_by(op_unique_carrier, origin, dest) %>% 
-  summarise(average = mean(total_dep_delay)) %>% ungroup() 
+  summarise(med = median(total_dep_delay)) %>% ungroup() 
 
 dd_small_2 <- inner_join(small_data_u, a2, by = c("op_unique_carrier", "origin", "dest"))
 
-ml_small <- dd_small_2 %>% mutate(total_dep_delay2 = ifelse(tot\al_dep_delay >= qrt_99, average, total_dep_delay))
+ml_small <- dd_small_2 %>% 
+  mutate(total_dep_delay2 = ifelse(total_dep_delay >= qrt_99, med, total_dep_delay)) %>% 
+  mutate(total_dep_delay2 = ifelse(total_dep_delay2 <= qrt_01, 0, total_dep_delay2))
 ml_small$total_dep_delay2 %>% range
 hist(ml_small$total_dep_delay2, breaks = 50)
 
-ml_data3 <- ml_small %>% select(-c(origin, dest, arr_delay, month, day_of_week, total_dep_delay, average, op_unique_carrier))
+ml_data3 <- ml_small %>% select(-c(origin, dest, arr_delay, month, day_of_week, total_dep_delay, med, op_unique_carrier))
 train <- sample(1:nrow(ml_data3), 0.8*nrow(ml_data3))
 dd_train <- ml_data3[train, ]
 dd_test <- ml_data3[-train, ]
@@ -133,7 +150,7 @@ while (length(xnames) > 0) {
 }
 
 ## save the result 
-save(log_fw, file = "bigdata/forward_selection.RData")
+save(log_fw, file = "bigdata/forward_selection_new.RData")
 
 ## result plot 
 log_fw$index <- seq(1, nrow(log_fw), by = 1)
