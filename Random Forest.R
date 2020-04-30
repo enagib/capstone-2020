@@ -5,12 +5,19 @@ library(randomForest)
 ##############################################################
 ## read in machine learning table
 ##############################################################
+dep_delay_data <- read_csv("dep_data.csv")
+arr_delay_data <- read_csv("arr_data.csv")
+arr_delay_data$X1 <- NULL
 
-data <- read_csv("ml_data.csv")
-data <- ml_data_dummy
-data <- data[, -grep("dest", colnames(data))]
-data <- data[, -grep("orig", colnames(data))]
-data <- data %>% select(-c(month, day_of_week, op_unique_carrier))
+# arr_delay_data <- arr_small_data
+# dep_delay_data <- dep_small_data
+
+# data <- ml_data_dummy
+dep_delay_data <- dep_delay_data[, -grep("dest", colnames(dep_delay_data))]
+dep_delay_data <- dep_delay_data[, -grep("orig", colnames(dep_delay_data))]
+arr_delay_data <- arr_delay_data[, -grep("dest", colnames(arr_delay_data))]
+arr_delay_data <- arr_delay_data[, -grep("orig", colnames(arr_delay_data))]
+
 
 cols <- c("presidents_day", "easter","memorial_day",        
           "independence_day", "labor_day", "thanksgiving","winter_holiday",               
@@ -22,15 +29,15 @@ cols <- c("presidents_day", "easter","memorial_day",
           "day_of_week_6", "day_of_week_7", "American","Alaska","JetBlue",             
           "Delta", "Frontier", "Allegiant", "Hawaiian", "Spirit", "United","Southwest")
 
-data[,cols] <- lapply(data[,cols] , factor)
-
-dep_delay_data <- data %>% select(-c(arr_delay))
-arr_delay_data <- data 
+dep_delay_data[,cols] <- lapply(dep_delay_data[,cols] , factor)
+arr_delay_data[,cols] <- lapply(arr_delay_data[,cols] , factor)
 
 ##############################################################
 ## Splitting data for test/train 
 ##############################################################
-
+dep_train_t <- dep_train %>% select(-total_dep_delay)
+y_hat_train_dep <- predict(fit_rf_dep, dep_train_t)
+mse_train_dep<- mean((y_hat_train_dep - y_train_dep)^2)
 train_dep <- round(0.8 * nrow(dep_delay_data))
 test_dep <- nrow(dep_delay_data) - train_dep
 
@@ -49,12 +56,12 @@ y_test_dep <- dep_test$total_dep_delay
 ##############################################################
 ##Random Forest for departure delay
 ##############################################################
-xnames_dep <- colnames(dep_delay_data)
-xnames_dep <- xnames_dep[!xnames_dep %in% c("total_dep_delay")]
-loopformula_dep <- "distance ~ Southwest"
-for (k in 1:50) {
-  loopformula_dep <- paste(loopformula_dep, "+",xnames_dep[k], sep = " ")}
-f_dep <- as.formula(loopformula_dep)
+# xnames_dep <- colnames(dep_delay_data)
+# xnames_dep <- xnames_dep[!xnames_dep %in% c("total_dep_delay")]
+# loopformula_dep <- "distance ~ Southwest"
+# for (k in 1:50) {
+#   loopformula_dep <- paste(loopformula_dep, "+",xnames_dep[k], sep = " ")}
+# f_dep <- as.formula(loopformula_dep)
 
 dep_test <- dep_test %>% select(-total_dep_delay)
 
@@ -63,9 +70,11 @@ fit_rf_dep <- randomForest(total_dep_delay~.,
                            ntree = 150,
                            do.trace = F)
 
+# fit_rf_dep <- rfcv(dep_train, y_tr
 dep_train_t <- dep_train %>% select(-total_dep_delay)
 y_hat_train_dep <- predict(fit_rf_dep, dep_train_t)
 mse_train_dep<- mean((y_hat_train_dep - y_train_dep)^2)
+
 
 y_hat_test_dep <- predict(fit_rf_dep, dep_test)
 mse_test_dep <- mean((y_hat_test_dep - y_test_dep)^2)
@@ -92,21 +101,20 @@ arr_test <- arr_delay_data[train_index_arr,]
 arr_train <- arr_delay_data[-train_index_arr,]
 
 ## set y variable
-y_train_arr <- arr_train$arr_delay
-y_test_arr <- arr_test$arr_delay
+y_train_arr <- arr_train$total_arr_delay
+y_test_arr <- arr_test$total_arr_delay
 
 ##############################################################
 ##Random Forest for arrival delay
 ##############################################################
-arr_train <- arr_train %>% select(-total_dep_delay)
-arr_test <- arr_test %>% select(-arr_delay, -total_dep_delay)
+arr_test <- arr_test %>% select(-total_arr_delay)
 
-fit_rf_arr <- randomForest(arr_delay~.,
+fit_rf_arr <- randomForest(total_arr_delay~.,
                            data = arr_train,
                            ntree = 150,
                            do.trace = F)
 
-arr_train_t <- arr_train %>% select(-arr_delay)
+arr_train_t <- arr_train %>% select(-total_arr_delay)
 y_hat_train_arr <- predict(fit_rf_arr, arr_train_t)
 mse_train_arr <- mean((y_hat_train_arr - y_train_arr)^2)
 
