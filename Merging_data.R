@@ -1,6 +1,7 @@
 library(readr)
 library(dplyr)
 library(robustHD)
+library(tidyr)
 options(scipen = 999)
 #########################################################################
 #Merging all flights data
@@ -14,6 +15,7 @@ flights_2019$X1 <- NULL
 flights_2018$X1 <- NULL
 
 flights <- do.call("rbind", list(flights_2015, flights_2016, flights_2017, flights_2018, flights_2019))
+
 flights <- flights %>%  mutate(total_arr_delay = ARR_DELAY + TAXI_IN, speed = DISTANCE/ACTUAL_ELAPSED_TIME,
                                total_dep_delay = DEP_DELAY + TAXI_OUT)
 flights$ARR_DELAY <- NULL
@@ -56,10 +58,13 @@ flights1 <- dd_unw2 %>%
 # data_top10$total_dep_delay <- ifelse(data_top10$total_dep_delay > high_qrt, high_qrt, data_top10$total_dep_delay)
 # data_top10$total_dep_delay <- ifelse(data_top10$total_dep_delay < low_qrt, low_qrt, data_top10$total_dep_delay)
 
+
+write.csv(holiday_delay, "holiday_delays.csv")
+
 set.seed(888)
 flights1 <- flights1 %>% 
   group_by(year,month) %>% 
-  sample_n(2000, replace = F) %>% 
+  sample_n(5000, replace = F) %>% 
   ungroup(year, month)
 
 
@@ -137,8 +142,19 @@ dep_small_data <- ml_data_dummy %>% select(-c(total_arr_delay, speed))
 arr_small_data <- ml_data_dummy %>% select(-c(distance))
 
 
-write_csv(dep_small_data, "dep_small_data.csv")
-write.csv(arr_small_data, "arr_small_data.csv")
+write_csv(dep_small_data, "dep_data.csv")
+write.csv(arr_small_data, "arr_data.csv")
 
 
+
+
+
+#Preparing table for holiday Visualization
+holiday_delay <- flights %>% select(total_dep_delay, total_arr_delay, "presidents_day", "easter","memorial_day",        
+                                    "independence_day", "labor_day", "thanksgiving","winter_holiday", year) %>% 
+  gather(key = "holiday", "value", -c(total_dep_delay, total_arr_delay,year)) %>% 
+  filter(value == 1) %>% 
+  group_by(year, holiday) %>% 
+  summarize(avg_dep_delay = mean(total_dep_delay),
+            avg_arr_delay = mean(total_arr_delay))
 
