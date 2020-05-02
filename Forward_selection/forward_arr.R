@@ -39,7 +39,9 @@ rmse_test_l_dep <- (mean((dd_test_dep$total_dep_delay - yhat_test_l_dep) ^ 2))^0
 ### small data 
 ## dep delay forward selection 
 small_data_arr <- read_csv('bigdata2/arr_small_data.csv')
-load("bigdata2/forward_selection_dep.RData")
+small_data_arr$X1 <- NULL
+# load("bigdata2/forward_selection_dep.RData")
+train_small <- sample(1:nrow(small_data_arr), 0.8*nrow(small_data_arr))
 train_arr <- small_data_arr[train_small, ]
 test_arr <- small_data_arr[-train_small, ]
 
@@ -50,7 +52,7 @@ xnames <- colnames(train_arr)
 xnames <- xnames[!xnames %in% 'total_arr_delay']
 fit_fw_arr <- lm(total_arr_delay ~ 1, data = train_arr)
 yhat_train_arr <- predict(fit_fw_arr, train_arr)
-yhat_test_arr <- predict(fit_fw, test_arr)
+yhat_test_arr <- predict(fit_fw_arr, test_arr)
 rmse_train_arr <- (mean((train_arr$total_arr_delay - yhat_train_arr) ^ 2))^0.5
 rmse_test_arr <- (mean((test_arr$total_arr_delay - yhat_test_arr) ^ 2)) ^ 0.5
 xname <- "intercept"
@@ -101,5 +103,16 @@ while (length(xnames) > 0) {
   xnames <- xnames[xnames!=best_xname]
 }
 
+
 ## save the result 
 save(log_fw_arr, file = "bigdata2/forward_selection_arr.RData")
+
+log_fw_arr$index <- seq(1, nrow(log_fw_arr))
+plot(log_fw_arr$index, log_fw_arr$rmse_test, main="Forward Selection" ,type="l", xlab="Number of Variables",
+     ylab="RMSE", col = "black", lwd = 2)
+lines(log_fw_arr$index, log_fw_arr$rmse_train, col = "blue", type = "l", lwd = 2)
+legend("topright",
+       c("Test", "Train"),
+       fill=c("black", "blue"))
+text(log_fw_arr$index[1:20], y = log_fw_arr$rmse_test[1:20], labels = 
+       log_fw_arr$xname[1:20], adj = c(1, 1), cex = 0.6)

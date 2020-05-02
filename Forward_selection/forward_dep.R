@@ -79,3 +79,11 @@ legend("topright",
        fill=c("black", "blue"))
 text(log_fw$index[1:20], y = log_fw$rmse_test[1:20], labels = 
        log_fw$xname[1:20], adj = c(1, 1), cex = 0.6)
+
+load('Forward_selection/forward_selection.RData')
+library(tidyverse)
+log_fw %>% View()
+
+
+load('bigdata2/forward_selection_dep.RData')
+log_fw %>% View()
